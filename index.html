@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#232D4B">
+  <link rel="icon" href="icon.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cuestionario SAP</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background-color: #232D4B;
+      color: white;
+    }
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px;
+      box-sizing: border-box;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+      color: white;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin: 12px 0;
+      color: #00AA9B;
+      font-size: 1.2rem;
+    }
+    button {
+      margin-top: 20px;
+      background-color: #F79646;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 1rem;
+      margin-right: 10px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    button:hover {
+      background-color: #e57c1f;
+      transform: scale(1.05);
+      opacity: 1;
+    }
+    .correct-answer {
+      background-color: #00AA9B !important;
+      color: white !important;
+      padding: 8px;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      transform: scale(1.03);
+    }
+    .incorrect-answer {
+      background-color: #F04641 !important;
+      color: white !important;
+      padding: 8px;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      transform: scale(1.03);
+    }
+    .hidden {
+      display: none;
+    }
+    #feedback {
+      margin-top: 15px;
+      font-size: 1.2rem;
+    }
+    #options {
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .fade-in {
+      animation: fadeIn 0.6s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 id="question"></h2>
+    <div id="options"></div>
+    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-top: 20px;">
+      <button id="checkButton">Comprobar</button>
+      <button id="nextButton" class="hidden">Siguiente</button>
+    </div>
+    <div style="margin-top: 20px; display: flex; justify-content: center;">
+      <button id="restartButton" class="hidden">Repetir Cuestionario</button>
+    </div>
+    <p id="feedback"></p>
+  </div>
+
+  <script>
+    const questions = [
+    {
+        "question": "Which master record object controls the use of an business partner in accounts payable?",
+        "options": [
+            "Business partner role",
+            "Business partner grouping",
+            "Business partner classification",
+            "Business partner category"
+        ],
+        "correct": [
+            "A"
+        ]
+    },
+    {
+        "question": "Which process in the integrated procure-to-pay process generates a balance sheet relevant financial accounting document? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Invoice verification",
+            "Purchase order creation",
+            "Goods receipt",
+            "Material requirements planning"
+        ],
+        "correct": [
+            "A",
+            "C"
+        ]
+    },
+    {
+        "question": "How can you process recurring entries? Note: There are 3 correct answers to this question.",
+        "options": [
+            "You can create a recurring entry without defining a recurrence start date.",
+            "You can post recurring entries only through the recurring entry program.",
+            "You can post recurring entries in standard posting apps, selecting the document type RE.",
+            "You can create a recurring invoice entry based on a template invoice.",
+            "You can schedule recurring entries to start automatically."
+        ],
+        "correct": [
+            "B",
+            "D",
+            "E"
+        ]
+    },
+    {
+        "question": "When do you perform the goods and invoice receipts reconciliation process?",
+        "options": [
+            "When a purchase order is posted, but no invoice has been received.",
+            "When an invoice is posted, but no goods receipt has been received.",
+            "When an invoice is posted, but no relevant purchase order is available.",
+            "When a purchase order is posted, but no goods receipt has been received."
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "What is the role of the valuation method in the foreign currency valuation of accounts payable? Note: There are 3 answers to this question.",
+        "options": [
+            "Define the posting and reversal date for the valuation posting",
+            "Define the document type for the valuation posting",
+            "Define the exchange rate type",
+            "Define the valuation procedure",
+            "Determine the G/L accounts for the valuation posting"
+        ],
+        "correct": [
+            "C",
+            "D",
+            "E"
+        ]
+    },
+    {
+        "question": "What is the result of an automatic payment run? Note: There are 3 correct answers to this question.",
+        "options": [
+            "Payment log",
+            "Payment plan",
+            "Payment documents",
+            "Payment media",
+            "Payment blocks"
+        ],
+        "correct": [
+            "A",
+            "C",
+            "D"
+        ]
+    },
+    {
+        "question": "Which of the following are steps in an automated payment run process? Note: There are 3 correct answers to this question.",
+        "options": [
+            "Maintain Parameters",
+            "Schedule Proposal Run",
+            "Upload Bank Statement",
+            "Schedule Invoice Run",
+            "Schedule Payment Run"
+        ],
+        "correct": [
+            "A",
+            "B",
+            "E"
+        ]
+    },
+    {
+        "question": "On which level do you maintain the long text for a general ledger account?",
+        "options": [
+            "Financial statement version",
+            "Chart of accounts",
+            "Company code",
+            "Controlling area"
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "On what level can you restrict postings using the posting period variant? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Customer reconciliation account",
+            "Fixed asset number",
+            "Supplier account",
+            "G/L account"
+        ],
+        "correct": [
+            "A",
+            "D"
+        ]
+    },
+    {
+        "question": "What is the relation between the line items displayed for a journal entry in the entry view and the general ledger view? not available in the general ledger view. are not available in the entry view.",
+        "options": [
+            "The entry view displays the subledger accounts (such as customer or supplier) while this is",
+            "The general ledger view displays account assignments such as the profit center while these",
+            "The general ledger view has as many or more line items as the entry view.",
+            "The entry view has as many or more line items as the general ledger view."
+        ],
+        "correct": [
+            "C"
+        ]
+    },
+    {
+        "question": "You need to produce additional financial statements according to Local GAAP requirements. Which dimension do you use in reporting?",
+        "options": [
+            "Ledger group",
+            "Profit center group",
+            "Functional areal",
+            "Journal entry type"
+        ],
+        "correct": [
+            "A"
+        ]
+    },
+    {
+        "question": "Which dimension do you use to produce external financial statements based on cost-of-sales accounting?",
+        "options": [
+            "Functional area",
+            "Segment",
+            "Market segment",
+            "Profit center"
+        ],
+        "correct": [
+            "A"
+        ]
+    },
+    {
+        "question": "You have a bank account in foreign currency. During the period you have posted various deposits to and withdrawals from the account. After the foreign currency valuation run, how does the system evaluate the balance of this account?",
+        "options": [
+            "In foreign currency, converted to local currency on a statistical ledger.",
+            "In local currency, with the exchange rate valid on the last day of the period.",
+            "In foreign currency, with no need for conversion.",
+            "In local currency, with the exchange rate valid for each transaction."
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "In which structure do you define where the accounts appear in the financial statement?",
+        "options": [
+            "Accounting principle",
+            "Chart of accounts",
+            "Financial statement version",
+            "Ledger group"
+        ],
+        "correct": [
+            "C"
+        ]
+    },
+    {
+        "question": "What does the journal entry type in general journal document posting control? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Which fields in the line items are mandatory fields.",
+            "Which fields in the document header are mandatory fields.",
+            "The document number assigned.",
+            "The number of possible line items in the FI document."
+        ],
+        "correct": [
+            "B",
+            "C"
+        ]
+    },
+    {
+        "question": "Which fields can you define on the document header of a general ledger posting? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Posting Key",
+            "G/L Account",
+            "Posting Date",
+            "Journal Entry Type"
+        ],
+        "correct": [
+            "C",
+            "D"
+        ]
+    },
+    {
+        "question": "Which fields can you define on the Chart of Accounts level of a G/L Account? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Account group",
+            "Account currency",
+            "Functional area",
+            "G/L account type"
+        ],
+        "correct": [
+            "A",
+            "D"
+        ]
+    },
+    {
+        "question": "On which levels can posting to a general ledger account be blocked? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Segment",
+            "Chart of accounts",
+            "Company code",
+            "Ledger"
+        ],
+        "correct": [
+            "B",
+            "C"
+        ]
+    },
+    {
+        "question": "Which dimensions can be used to provide complete balance sheet reports? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Functional area",
+            "Segment",
+            "Profit center",
+            "Cost center"
+        ],
+        "correct": [
+            "B",
+            "C"
+        ]
+    },
+    {
+        "question": "In general journal entries, which date determines the reporting period in which document values are included?",
+        "options": [
+            "Journal Entry Date",
+            "Translation Date",
+            "Reference Date",
+            "Posting Date"
+        ],
+        "correct": [
+            "D"
+        ]
+    },
+    {
+        "question": "What are the restrictions when posting general journal entries to special periods? Note: There are 2 correct answers to this question.",
+        "options": [
+            "You must use the document type YE (year end).",
+            "You must specify a posting date in the last period of the fiscal year.",
+            "You must only post to balance sheet accounts.",
+            "You must manually enter the specific special period you are posting to."
+        ],
+        "correct": [
+            "B",
+            "D"
+        ]
+    },
+    {
+        "question": "You use the app \"Manage Journal Entries\" to display changes to journal entries. Which changes can be part of the list? Note: There are 2 correct answers to this question.",
+        "options": [
+            "User who made the change",
+            "Date of the change",
+            "G/L Account that was changed.",
+            "Amount that was changed"
+        ],
+        "correct": [
+            "A",
+            "B"
+        ]
+    },
+    {
+        "question": "For which fields can you enter time-dependent changes in the asset master record? Note: There are 3 correct answers to this question.",
+        "options": [
+            "WBS element",
+            "Plant",
+            "Trading partner number",
+            "Cost center",
+            "Description"
+        ],
+        "correct": [
+            "A",
+            "B",
+            "D"
+        ]
+    },
+    {
+        "question": "What does the asset class determine? Note: There are 3 correct answers to this question.",
+        "options": [
+            "The inventory number",
+            "The balance sheet structure",
+            "The asset number",
+            "The default depreciation key",
+            "The G/L accounts for asset transactions"
+        ],
+        "correct": [
+            "C",
+            "D",
+            "E"
+        ]
+    },
+    {
+        "question": "What element identifies the business transaction for asset postings?",
+        "options": [
+            "The asset class",
+            "The transaction type",
+            "The app used to post",
+            "The document type"
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "What can you do when executing a depreciation posting run? Note: There are 3 correct answers to this question.",
+        "options": [
+            "You can run depreciation separately for each ledger.",
+            "You can check the posted depreciation for each asset on the FI document.",
+            "You can process a depreciation test run for individual assets.",
+            "You can reverse the FI posting documents of the depreciation run.",
+            "You can select to cancel the depreciation run if the program finds errors in individual assets."
+        ],
+        "correct": [
+            "A",
+            "B",
+            "C"
+        ]
+    },
+    {
+        "question": "How can you identify an asset number as a main asset number?",
+        "options": [
+            "By the prefix -1 after the asset number",
+            "By the description of the asset",
+            "By the lack of prefix for the asset",
+            "By the prefix -0 after the asset number"
+        ],
+        "correct": [
+            "D"
+        ]
+    },
+    {
+        "question": "In the Manage Fixed Assets app, assets that are created in the database but not activated or deactivated are displayed under which tab?",
+        "options": [
+            "Saved",
+            "Acquired",
+            "Created",
+            "Draft"
+        ],
+        "correct": [
+            "C"
+        ]
+    },
+    {
+        "question": "Which asset accounting relevant postings are made periodically, typically at the end of the month? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Post transfer of an asset",
+            "Depreciation Posting",
+            "Post asset acquisition via clearing account",
+            "Settlement of the WBS element"
+        ],
+        "correct": [
+            "B",
+            "D"
+        ]
+    },
+    {
+        "question": "For an asset under construction (AuC) linked to a WBS element, what do you do? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Post costs directly to the AuC since the WBS element is always statistical.",
+            "Post depreciation for the AuC after costs are first debited to it.",
+            "Post cost to the AuC through settlement of the WBS element",
+            "Maintain a settlement rule for the WBS element."
+        ],
+        "correct": [
+            "C",
+            "D"
+        ]
+    },
+    {
+        "question": "Which asset characteristic controls if an asset is under construction?",
+        "options": [
+            "Depreciation key",
+            "Asset class",
+            "Settlement profile",
+            "Capitalization date"
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "Which date determines the period of the asset acquisition?",
+        "options": [
+            "Posting Date",
+            "Document Date",
+            "Base Date",
+            "Asset Value Date"
+        ],
+        "correct": [
+            "A"
+        ]
+    },
+    {
+        "question": "You post and match an incoming payment to the incorrect customer account.How can you correct the mistake?",
+        "options": [
+            "Change the customer on the payment document.",
+            "Reset the clearing and reverse the document.",
+            "Issue a credit memo to the customer.",
+            "Contact the customer through correspondence."
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "When processing manual incoming payments, which of the following options can be used to manage payment differences? Note: There are 3 correct answers to this question.",
+        "options": [
+            "Return payment",
+            "Payment on account",
+            "Individual value adjustment",
+            "Partial payment",
+            "Residual payment"
+        ],
+        "correct": [
+            "C",
+            "D",
+            "E"
+        ]
+    },
+    {
+        "question": "At which point in the integrated sales process is a balance sheet relevant accounting document created?",
+        "options": [
+            "Quotation",
+            "Goods issue",
+            "Sales order confirmation",
+            "Sales order creation"
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "Which editing options are available in the dunning proposal list? Note: There are 3 correct answers to this question.",
+        "options": [
+            "Change the dunning charges.",
+            "Editing the dunning texts.",
+            "Change the dunning level of an open item.",
+            "Edit dunning blocks at line item level.",
+            "Edit dunning blocks at account level."
+        ],
+        "correct": [
+            "C",
+            "D",
+            "E"
+        ]
+    },
+    {
+        "question": "Which of the following fields are maintained on the general data segment of the customer business partner? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Bank key",
+            "Communication language",
+            "Payment method",
+            "Company code"
+        ],
+        "correct": [
+            "A",
+            "B"
+        ]
+    },
+    {
+        "question": "When processing payments, what are possible functions of reason codes? Note: There are 3 correct answers to this question.",
+        "options": [
+            "Automatic posting of a residual item to a specified G/L account",
+            "Control of the account where a residual item is posted",
+            "Create a sales order",
+            "Generate a payment reminder",
+            "Control of the type of payment notice sent to a customer"
+        ],
+        "correct": [
+            "A",
+            "B",
+            "E"
+        ]
+    },
+    {
+        "question": "What are the effects of a goods issue posting? Note: There are 2 correct answers to this question.",
+        "options": [
+            "It increases the inventory value.",
+            "It reduces the inventory value.",
+            "It posts an accounting document.",
+            "It generates an invoice for approval."
+        ],
+        "correct": [
+            "B",
+            "C"
+        ]
+    },
+    {
+        "question": "Which fields can be changed in a posted invoice? Note: There are 3 correct answers to this question.",
+        "options": [
+            "Payment terms",
+            "Line item text",
+            "Invoice amount",
+            "Reference",
+            "Profit center"
+        ],
+        "correct": [
+            "A",
+            "B",
+            "D"
+        ]
+    },
+    {
+        "question": "Which technologies should you use to integrate SAP S/4HANA Cloud Public Edition with another SAP public cloud solution? Note: There are 2 correct answers to this question",
+        "options": [
+            "SAP Cloud Connector",
+            "SAP Process Orchestration",
+            "SAP Integration Suite",
+            "Predelivered APIs"
+        ],
+        "correct": [
+            "A",
+            "D"
+        ]
+    },
+    {
+        "question": "In which application can you see the available business context capacity remaining for extension items?",
+        "options": [
+            "Extensibility Cockpit app",
+            "Extensibility Inventory app",
+            "Custom Reusable Elements app",
+            "Extensibility Explorer app"
+        ],
+        "correct": [
+            "A"
+        ]
+    },
+    {
+        "question": "Where is the initial list of known integrations documented?",
+        "options": [
+            "In the Business Driven Configuration Questionnaire",
+            "In the Digital Discovery Assessment",
+            "In SAP Cloud ALM",
+            "In the Fit-to-Standard Workshops"
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "After integration requirements have been finalized, what is used to analyze, design, and document the integration strategy?",
+        "options": [
+            "SAP Business Accelerator Hub",
+            "SAP Cloud ALM Requirements app",
+            "Integration Solution Advisory Methodology",
+            "Integration and API List"
+        ],
+        "correct": [
+            "C"
+        ]
+    },
+    {
+        "question": "If a customer wants to develop their own custom application and integrate it with SAP S/4HANA Cloud Public Edition, what tools would you recommend to develop the app? Note: There are 2 correct answers to this question.",
+        "options": [
+            "SAP Build",
+            "SAP Cloud Portal Service",
+            "SAP Business Application Studio",
+            "SAP HANA Cloud"
+        ],
+        "correct": [
+            "C",
+            "D"
+        ]
+    },
+    {
+        "question": "What tools enable non-developers to create low/no-code extensions? Note: There are 2 correct answers to this question.",
+        "options": [
+            "SAP Build",
+            "SAP Fiori extensibility apps",
+            "SAP Cloud SDK",
+            "SAP Business Application Studio"
+        ],
+        "correct": [
+            "A",
+            "B"
+        ]
+    },
+    {
+        "question": "What must you create when you build an integration scenario using the SAP Fiori Communication Management apps in SAP S/4HANA Cloud Public Edition? Note: There are 2 correct answers to this question. Workshops",
+        "options": [
+            "Communication interface",
+            "Communication system",
+            "Communication API",
+            "Communication arrangement"
+        ],
+        "correct": [
+            "B",
+            "D"
+        ]
+    },
+    {
+        "question": "If you cannot find a prepackaged solution process that addresses integration requirements in SAP Signavio Process Navigator, where do you look next?",
+        "options": [
+            "SAP Business Technology Platform",
+            "SAP Discovery Center",
+            "SAP Cloud ALM",
+            "SAP Business Accelerator Hub"
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "How does an implementation consultant support customer experts during Fit-to-Standard workshops? Note: There are 2 correct answers to this question. Workshops",
+        "options": [
+            "Demonstrate SAP Best Practice business processes in the starter system.",
+            "Conduct end-user training on active scope items.",
+            "Highlight areas that require configuration or customization decisions.",
+            "Determine set up instructions for customer-driven integrations."
+        ],
+        "correct": [
+            "A",
+            "C"
+        ]
+    },
+    {
+        "question": "Which of the following activities are completed in the Realize phase of the SAP Activate Methodology? Note: There are 2 correct answers to this question. Workshops",
+        "options": [
+            "Gather perceived change impact feedback",
+            "Enter configuration values in SAP Central Business Configuration",
+            "Demonstrate where to find business process documentation",
+            "Set up manual test cases in SAP Cloud ALM"
+        ],
+        "correct": [
+            "B",
+            "D"
+        ]
+    },
+    {
+        "question": "In which SAP Activate methodology phase do consultants configure business processes based on the information gathered in the Fit-to-Standard workshops?",
+        "options": [
+            "Explore",
+            "Realize",
+            "Deploy",
+            "Prepare"
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "In which type of extensibility is the SAP Business Technology Platform used to host a custom extension? Workshops",
+        "options": [
+            "Classic extensibility",
+            "Side-by-side extensibility",
+            "Key user extensibility",
+            "Developer extensibility"
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "Based on the SAP Activate methodology, which activities must you perform in the Explore phase? Note: There are 2 correct answers to this question. Workshops",
+        "options": [
+            "Conduct the Fit-to-Standard analysis to gather configuration values.",
+            "Use the Test system to demonstrate SAP Best Practice processes.",
+            "Define the organizational structure and chart of accounts.",
+            "Conduct the Digital Discovery Assessment to identify extension requirements."
+        ],
+        "correct": [
+            "A",
+            "C"
+        ]
+    },
+    {
+        "question": "What does a partner line of business configuration expert reference when identifying business processes to cover in the Fit-to-Standard workshops?",
+        "options": [
+            "SAP Signavio Process Collaboration Hub",
+            "SAP Signavio Journey Modeler",
+            "Digital Discovery Assessment",
+            "Business Driven Configuration Questionnaire"
+        ],
+        "correct": [
+            "D"
+        ]
+    },
+    {
+        "question": "What activities are applied to the entire system and cannot be changed after confirmation in SAP Central Business Configuration? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Scoping",
+            "Group currency",
+            "Configuration activities",
+            "Fiscal year variant"
+        ],
+        "correct": [
+            "B",
+            "D"
+        ]
+    },
+    {
+        "question": "What have SAP S/4HANA Cloud Business Workflows been designed for? Note: There are 3 correct answers to this question. sequence",
+        "options": [
+            "To create cross-product workflow procedures",
+            "To create very simple release or approval procedures",
+            "To create business processes with a high number of people involved in a pre-defined",
+            "To create complex, repeated work processes with iterative cycles",
+            "To create standard procedures from SAP Signavio Process Navigator"
+        ],
+        "correct": [
+            "B",
+            "C",
+            "D"
+        ]
+    },
+    {
+        "question": "In SAP Central Business Configuration, which activities can you perform in the Product-Specific",
+        "options": [
+            "Change approval thresholds.",
+            "Add new sales organizations.",
+            "Modify building blocks.",
+            "Add blocking reasons for billing.",
+            "Create new scope items."
+        ],
+        "correct": [
+            "B",
+            "C",
+            "E"
+        ]
+    },
+    {
+        "question": "What do you use to collect the values that are entered into the configuration activities in SAP Central Business Configuration?",
+        "options": [
+            "SAP Cloud ALM Processes app",
+            "Business Driven Configuration Questionnaire",
+            "SAP Cloud ALM Requirements app",
+            "Availability and Dependencies of Solution Processes Excel"
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "Which of the following analyses can you create from the Manage KPIs and Reports app? Note: There are 3 correct answers to this question.",
+        "options": [
+            "Multidimensional Reports",
+            "Review Booklets",
+            "SAC Stories",
+            "Object Views",
+            "Lumira Dashboards"
+        ],
+        "correct": [
+            "A",
+            "B",
+            "C"
+        ]
+    },
+    {
+        "question": "You have assigned a business role to an end user who has been granted access to only one specific application. While you have a day off, it turns out that the app doesn't show up on the user's launchpad. What can the user do?",
+        "options": [
+            "Assign a different business role that provides access.",
+            "Create a page and assign it to the launchpad space.",
+            "Use the search function to find the app.",
+            "Assign a launchpad space to the business role."
+        ],
+        "correct": [
+            "C"
+        ]
+    },
+    {
+        "question": "Which embedded support offerings can you make use of in the SAP Fiori Launchpad? Note: There are 3 correct answers to this question.",
+        "options": [
+            "Video tutorials from the SAP Help Portal",
+            "Digital assistance from generative AI (SAP Joule)",
+            "Recorded system simulations from the Learning Center",
+            "Recorded webinars from the SAP Learning Website",
+            "Assessment questions from the SAP Learning Hub"
+        ],
+        "correct": [
+            "A",
+            "B",
+            "C"
+        ]
+    },
+    {
+        "question": "Which of the following systems are used to implement SAP S/4HANA Cloud Public Edition for a customer? Note: There are 3 correct answers to this question.",
+        "options": [
+            "Sandbox system",
+            "Starter system",
+            "Development system",
+            "Trial system",
+            "Test system"
+        ],
+        "correct": [
+            "B",
+            "C",
+            "E"
+        ]
+    },
+    {
+        "question": "An SAP Fiori app isn't displaying on the SAP Fiori Launchpad even though the business role granting permission to the app is correctly assigned to the user. How would you troubleshoot? Note: There are 3 correct answers to this question.",
+        "options": [
+            "Check the space and page(s) assigned to the role.",
+            "Check the restrictions for the role.",
+            "Check the Role Maintenance app.",
+            "Check the business role template.",
+            "Check the business catalogues assigned to the role."
+        ],
+        "correct": [
+            "C",
+            "D",
+            "E"
+        ]
+    },
+    {
+        "question": "Through which component do you access your assigned process tasks from the SAP Activate Roadmap of SAP S/4HANA Cloud Public Edition (3-system landscape)?",
+        "options": [
+            "SAP Cloud ALM for Service",
+            "SAP Cloud ALM for Operations",
+            "SAP Central Business Configuration",
+            "SAP Cloud ALM for Implementation"
+        ],
+        "correct": [
+            "D"
+        ]
+    },
+    {
+        "question": "Which activities can you complete in the Maintain Business Roles SAP Fiori app? Note: There are 2 correct answers to this question",
+        "options": [
+            "Maintain technical catalogs",
+            "Assign business catalogs to a business role",
+            "Maintain restrictions",
+            "Assign PFCG profiles to a business role"
+        ],
+        "correct": [
+            "B",
+            "C"
+        ]
+    },
+    {
+        "question": "How can you define the relationship between business roles and business catalogs?",
+        "options": [
+            "A business role restricts access to one or more business catalogs.",
+            "A business role is a collection of one or more business catalogs.",
+            "A business catalog is a collection of one or more business roles.",
+            "A business catalog restricts access to one or more business roles."
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "What is the correct release code for the second feature delivery in February 2025?",
+        "options": [
+            "2025.2.2",
+            "2502.2",
+            "2522",
+            "2025.2"
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "You are recording actions for a custom process step in a test automate. When do you press the \"Read\" button on the recording panel? Note: There are 2 correct answers to this question.",
+        "options": [
+            "To capture a value in a text field that should be stored as a variable.",
+            "To capture a static label on the screen that should be checked during test execution.",
+            "To capture an error message on the screen that can be used later.",
+            "To capture text in a message screen that can be used for data binding later."
+        ],
+        "correct": [
+            "A",
+            "D"
+        ]
+    },
+    {
+        "question": "What are some characteristics of the SAP S/4HANA Migration Cockpit? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Guidance and simulation of the migration process",
+            "Extensibility using the Legacy System Migration Workbench",
+            "Combining the local and remote schema approaches into one migration project",
+            "Mapping source values to SAP S/4HANA target values"
+        ],
+        "correct": [
+            "A",
+            "D"
+        ]
+    },
+    {
+        "question": "Where are the manual test cases created for customer User Acceptance Testing?",
+        "options": [
+            "Test Automation Tool",
+            "SAP Solution Manager",
+            "SAP Cloud ALM",
+            "SAP Signavio Process Navigator"
+        ],
+        "correct": [
+            "C"
+        ]
+    },
+    {
+        "question": "Which tasks are mandatory before you can migrate data for a specific object? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Predecessor objects have been migrated",
+            "All previous migration projects are in the \"Finished\" status",
+            "Permission to migrate the data has been assigned",
+            "You select the same migration method previously used for other objects"
+        ],
+        "correct": [
+            "A",
+            "C"
+        ]
+    },
+    {
+        "question": "When do you specify the data retention period in the SAP S/4HANA Migration Cockpit?",
+        "options": [
+            "When the project status is \"Not Started\"",
+            "When the project status is \"Finished\"",
+            "When the project status in \"In Progress\"",
+            "When the project status is \"Completed"
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "When using the Local SAP S/4HANA Database Schema migration approach, what is the maximum file size? Note: There are 2 correct answers to this question.",
+        "options": [
+            "160 MB per file",
+            "160 MB per ZIP file",
+            "100 MB per ZIP file",
+            "100 MB per file"
+        ],
+        "correct": [
+            "B",
+            "D"
+        ]
+    },
+    {
+        "question": "How can you migrate data to SAP S/4HANA Cloud Public Edition? Note: There are 2 correct answers to this question.",
+        "options": [
+            "With the zero downtime service",
+            "With XML or CSV templates",
+            "With Core Data Services",
+            "With a separate SAP HANA database"
+        ],
+        "correct": [
+            "B",
+            "C"
+        ]
+    },
+    {
+        "question": "What are some characteristics of public cloud? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Lower total cost of ownership",
+            "Perpetual license",
+            "Multi-tenant server",
+            "Software installation on customer site"
+        ],
+        "correct": [
+            "A",
+            "C"
+        ]
+    },
+    {
+        "question": "What provides a foundation for the SAP Cloud ERP where integrations and extensions live?",
+        "options": [
+            "SAP Business Technology Platform",
+            "SAP ABAP Environment",
+            "SAP Discovery Center",
+            "SAP Business Accelerator Hub"
+        ],
+        "correct": [
+            "A"
+        ]
+    },
+    {
+        "question": "Which tools does SAP provide to make it easier for customers to maintain their SAP S/4HANA Cloud systems after a release upgrade? Note: There are 2 correct answers to this question.",
+        "options": [
+            "SAP Signavio Process Navigator Tool",
+            "What's New Viewer Tool",
+            "Test Automation Tool",
+            "Release Assessment and Scope Dependency Tool"
+        ],
+        "correct": [
+            "B",
+            "D"
+        ]
+    },
+    {
+        "question": "Which of the following are captured in a completed Digital Discovery Assessment? Note: There are 2 correct answers to this question.",
+        "options": [
+            "Target customer go-live date",
+            "Business role requirements",
+            "Known integration requirements",
+            "SAP Fiori application extensions"
+        ],
+        "correct": [
+            "A",
+            "C"
+        ]
+    },
+    {
+        "question": "Which layer of SAP S/4HANA provides a universal language to read and process data across different applications?",
+        "options": [
+            "SAP Business Suite",
+            "Core Data Services",
+            "SAP HANA",
+            "SAP Fiori"
+        ],
+        "correct": [
+            "B"
+        ]
+    },
+    {
+        "question": "Where do you find industry cloud solutions to address a customer's unique requirement?",
+        "options": [
+            "SAP Discovery Center",
+            "SAP Business Technology Platform",
+            "SAP Store",
+            "SAP Signavio Process Navigator"
+        ],
+        "correct": [
+            "C"
+        ]
+    }
+];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function loadQuestion() {
+      document.getElementById("feedback").textContent = "";
+      document.getElementById("nextButton").classList.add("hidden");
+
+      if (currentQuestionIndex >= questions.length) {
+        document.getElementById("question").textContent = `Cuestionario completado. Puntuación: ${score}/${questions.length}`;
+        document.getElementById("options").innerHTML = "";
+        document.getElementById("checkButton").classList.add("hidden");
+        document.getElementById("restartButton").classList.remove("hidden");
+        return;
+      }
+
+      const q = questions[currentQuestionIndex];
+      const questionElem = document.getElementById("question");
+      questionElem.classList.remove("fade-in");
+      void questionElem.offsetWidth;
+      questionElem.classList.add("fade-in");
+      questionElem.textContent = `${currentQuestionIndex + 1}. ${q.question}`;
+
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+
+      q.options.forEach((option, i) => {
+        const label = document.createElement("label");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.name = "option";
+        checkbox.value = String.fromCharCode(65 + i);
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(` ${String.fromCharCode(65 + i)}. ${option}`));
+        optionsDiv.appendChild(label);
+      });
+    }
+
+    document.getElementById("checkButton").addEventListener("click", function () {
+      const selectedOptions = Array.from(document.querySelectorAll('input[name="option"]:checked')).map(el => el.value);
+      if (selectedOptions.length === 0) return alert("Seleccione al menos una opción");
+
+      const q = questions[currentQuestionIndex];
+      if (JSON.stringify(selectedOptions.sort()) === JSON.stringify(q.correct.sort())) {
+        score++;
+        document.getElementById("feedback").textContent = "¡Correcto!";
+      } else {
+        document.getElementById("feedback").textContent = "Incorrecto. La respuesta correcta es: " + q.correct.map(c => `${c}. ${q.options[c.charCodeAt(0) - 65]}`).join(", ");
+      }
+      document.getElementById("nextButton").classList.remove("hidden");
+
+      const allOptions = document.querySelectorAll('input[name="option"]');
+      allOptions.forEach(opt => {
+        opt.disabled = true;
+        if (q.correct.includes(opt.value)) {
+          opt.parentElement.classList.add("correct-answer");
+        } else if (selectedOptions.includes(opt.value)) {
+          opt.parentElement.classList.add("incorrect-answer");
+        }
+      });
+    });
+
+    document.getElementById("nextButton").addEventListener("click", function () {
+      currentQuestionIndex++;
+      loadQuestion();
+    });
+
+    document.getElementById("restartButton").addEventListener("click", function () {
+      currentQuestionIndex = 0;
+      score = 0;
+      shuffle(questions);
+      document.getElementById("checkButton").classList.remove("hidden");
+      document.getElementById("restartButton").classList.add("hidden");
+      loadQuestion();
+    });
+
+    shuffle(questions);
+    loadQuestion();
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+</body>
+</html>
